@@ -10,6 +10,7 @@
 // SetLogLevel  - устанавливает для логгера уровень логирования
 // SetStoreDays - устанавливает для логгера кол-во дней ротации
 
+
 package mlog
 
 import (
@@ -70,12 +71,15 @@ func (ldata *TLogger) checkLogRotation() {
 				-ldata.StoreDays-i), true)
 			files, err := filepath.Glob(logfilename)
 			if err != nil {
-				Logln(err)
+				// Write to console
+				log.Printf("unable to expand mask: ", err)
 			}
 			for _, f := range files {
 				log.Println("Delete: " + f)
-				if err := os.Remove(f); err != nil {
-					Logln(err)
+				err := os.Remove(f);
+				if err != nil {
+					// write to console
+					log.Println("unable to delete file: ", err)
 				}
 			}
 		}
