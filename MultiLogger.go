@@ -186,12 +186,11 @@ func newLogger(ID string, BaseFileName string, StoreDays int, Level int) TLogger
 
 func SetStoreDays(LoggerID string, StoreDays int) {
 	loggers.Sync.Lock()
-	defer func() {
-		loggers.Sync.Unlock()
-	}()
 	logger, found := loggers.Items[LoggerID]
 	if !found {
+		loggers.Sync.Unlock()
 		logger = newLogger(LoggerID, getDefLoggerFileName(LoggerID), StoreDays, DefLevel)
+		loggers.Sync.Lock()
 	} else {
 		logger.StoreDays = StoreDays
 	}
@@ -199,16 +198,17 @@ func SetStoreDays(LoggerID string, StoreDays int) {
 	if LoggerID == DefLoggerID {
 		defLogger = logger
 	}
+	loggers.Sync.Unlock()
+
 }
 
 func SetLogLevel(LoggerID string, Level int) {
 	loggers.Sync.Lock()
-	defer func() {
-		loggers.Sync.Unlock()
-	}()
 	logger, found := loggers.Items[LoggerID]
 	if !found {
+		loggers.Sync.Unlock()
 		logger = newLogger(LoggerID, getDefLoggerFileName(LoggerID), DefStoreDays, Level)
+		loggers.Sync.Lock()
 	} else {
 		logger.Level = Level
 	}
@@ -216,6 +216,7 @@ func SetLogLevel(LoggerID string, Level int) {
 	if LoggerID == DefLoggerID {
 		defLogger = logger
 	}
+	loggers.Sync.Unlock()
 }
 
 ///////////////////////////////////////////////////
